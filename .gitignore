@@ -4,3 +4,7 @@ node_modules/
 .env
 .venv/
 dist/
+
+# Local-only files
+start.bat
+01 Original Assets/

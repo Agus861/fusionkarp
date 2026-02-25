@@ -10,7 +10,7 @@
 
 ## 🎨 Créditos y Diseño
 
-Este proyecto fue desarrollado por **Agus861** por puro ocio y diversión para un tercero. Todo el diseño visual y la identidad de marca están respaldados por:
+Este proyecto fue desarrollado por **SteamSkull Productions** por puro ocio y diversión para un tercero. Todo el diseño visual y la identidad de marca están respaldados por:
 
 🚀 **[SteamSkull Productions](https://steamskullproductions.myportfolio.com/work)**
 

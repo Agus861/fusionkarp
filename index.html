@@ -4,8 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fusion-Karp — Magikarp Type Fusion</title>
+    <title>Fusion-Karp</title>
     <meta name="description" content="Fuse Magikarp with every Pokémon type! Collect all fusions in your Pokédex.">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -15,6 +16,16 @@
 </head>
 
 <body>
+    <!-- ═══════════ MOBILE WARNING ═══════════ -->
+    <div class="mobile-warning" id="mobileWarning">
+        <div class="mobile-warning-inner">
+            <img src="assets/fusions/00 Magikarp original water.png" alt="Magikarp" class="mobile-warning-karp">
+            <h2 class="mobile-warning-title">Desktop Only</h2>
+            <p class="mobile-warning-text">Fusion-Karp is designed exclusively for desktop browsers. Please visit from a
+                PC to enjoy the full experience!</p>
+        </div>
+    </div>
+
     <!-- ═══════════ PARTICLE CANVAS (behind everything) ═══════════ -->
     <canvas id="particleCanvas"></canvas>
 
@@ -37,6 +48,10 @@
 
     <!-- ═══════════ SCREEN: MENU ═══════════ -->
     <section id="menuScreen" class="screen active">
+        <!-- Reset button (visible in free mode) -->
+        <button class="btn-menu-reset hidden" id="btnMenuReset" title="Reset Progress">
+            🔄 RESET
+        </button>
         <div class="menu-container">
             <div class="menu-logo-wrap">
                 <img src="assets/logos/Pokemon text logo.png" alt="Pokémon" class="menu-pokemon-logo">
@@ -165,7 +180,7 @@
                     stroke-linecap="round" stroke-linejoin="round">
                     <path d="M15 18l-6-6 6-6" />
                 </svg>
-                MENU
+                BACK
             </button>
             <div class="top-bar-title">
                 <img src="assets/logos/Pokedex icon.png" alt="" class="pokedex-title-icon">
@@ -202,18 +217,35 @@
 
     <!-- About modal removed — now inline in menu -->
 
-    <!-- ═══════════ GLITCH UNLOCK OVERLAY ═══════════ -->
-    <div class="glitch-unlock-overlay hidden" id="glitchUnlockOverlay">
-        <div class="glitch-unlock-content">
-            <div class="glitch-static"></div>
-            <h2 class="glitch-unlock-title" data-text="SECRET UNLOCKED">SECRET UNLOCKED</h2>
-            <p class="glitch-unlock-sub">You found all fusions!</p>
-            <p class="glitch-unlock-sub">A strange signal has appeared...</p>
-            <img src="assets/fusions/Magikarp glitch.png" alt="Glitch Magikarp" class="glitch-unlock-image">
-            <h3 class="glitch-unlock-name" data-text="MAGI̷̢GLITCH">MAGI̷̢GLITCH</h3>
-            <button class="btn btn-primary glitch-unlock-btn" id="btnGlitchDismiss">ACCEPT SIGNAL</button>
+    <!-- ═══════════ SCREEN: OUTRO (shown once after Magiglitch unlock) ═══════════ -->
+    <section id="outroScreen" class="screen">
+        <div class="outro-container">
+            <div class="outro-static"></div>
+            <div class="outro-inner">
+                <img src="assets/fusions/Magikarp glitch.png" alt="Magiglitch" class="outro-glitch-image">
+                <div class="outro-text">
+                    <h2 class="outro-title" data-text="CONGRATULATIONS!">CONGRATULATIONS!</h2>
+                    <p class="outro-message">
+                        You've unlocked every fusion — including <strong class="outro-highlight">MAGI̷̢GLITCH</strong>.
+                        You are a <strong class="outro-highlight">true Magikarp enthusiast</strong>! 🐟✨
+                    </p>
+                    <p class="outro-share">
+                        Share your collection! Screenshot your Pokédex or favorite fusion.
+                    </p>
+                    <div class="outro-buttons">
+                        <button class="btn btn-primary outro-btn-free" id="btnFreeMode">
+                            <span class="btn-icon">🔓</span>
+                            FREE MODE
+                        </button>
+                        <button class="btn btn-secondary outro-btn-reset" id="btnReset">
+                            <span class="btn-icon">🔄</span>
+                            RESET
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
 
     <script src="app.js"></script>
 </body>

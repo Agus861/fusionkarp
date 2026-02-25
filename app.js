@@ -104,18 +104,25 @@ const GLITCH_FUSION = {
 };
 
 const STORAGE_KEY = 'fusionkarp_unlocked';
+const STORAGE_OUTRO = 'fusionkarp_outro_seen';
+const STORAGE_FREE = 'fusionkarp_free_mode';
 const TOTAL_REGULAR = FUSIONS.length;
 
 // ═══════════ STATE ═══════════
 let unlocked = loadUnlocked();
 let currentScreen = 'menu';
+let previousScreen = 'menu';
 let isFusing = false;
-let lastFusion = null; // track current fusion for capture animation
+let lastFusion = null;
+let glitchReady = false;
+let glitchJustUnlocked = false;
+let freeMode = localStorage.getItem(STORAGE_FREE) === 'true';
+let outroSeen = localStorage.getItem(STORAGE_OUTRO) === 'true';
 
 // ═══════════ DOM REFS ═══════════
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
-const screens = { menu: $('#menuScreen'), fusion: $('#fusionScreen'), pokedex: $('#pokedexScreen') };
+const screens = { menu: $('#menuScreen'), fusion: $('#fusionScreen'), pokedex: $('#pokedexScreen'), outro: $('#outroScreen') };
 const particleCanvas = $('#particleCanvas');
 const ctx = particleCanvas.getContext('2d');
 
@@ -129,6 +136,11 @@ function init() {
     bindEvents();
     updateBadges();
     createTypeRing();
+    // Show menu reset button if in free mode
+    if (freeMode) {
+        const menuReset = $('#btnMenuReset');
+        if (menuReset) menuReset.classList.remove('hidden');
+    }
 }
 
 // ═══════════ LOCALSTORAGE ═══════════
@@ -143,9 +155,7 @@ function unlockFusion(id) {
         unlocked.push(id);
         saveUnlocked();
         updateBadges();
-        if (unlocked.filter(u => u !== 'glitch').length >= TOTAL_REGULAR && !unlocked.includes('glitch')) {
-            setTimeout(() => showGlitchUnlock(), 1500);
-        }
+        updateTypeRingUnlocked();
     }
 }
 
@@ -168,6 +178,9 @@ function goToScreen(name) {
     const outScreen = screens[currentScreen];
     const inScreen = screens[name];
 
+    // Remember where we came from when entering the pokedex
+    if (name === 'pokedex') previousScreen = currentScreen;
+
     // Show/hide menu type bg
     const typeBg = $('#menuTypeBg');
     typeBg.style.opacity = (name === 'menu') ? '1' : '0';
@@ -187,13 +200,32 @@ function goToScreen(name) {
 // ═══════════ EVENTS ═══════════
 function bindEvents() {
     $('#btnStartFusion').addEventListener('click', () => goToScreen('fusion'));
-    $('#btnFusionBack').addEventListener('click', () => goToScreen('menu'));
+    $('#btnFusionBack').addEventListener('click', () => {
+        if (glitchJustUnlocked && !outroSeen) {
+            glitchJustUnlocked = false;
+            outroSeen = true;
+            localStorage.setItem(STORAGE_OUTRO, 'true');
+            goToScreen('outro');
+        } else {
+            goToScreen('menu');
+        }
+    });
     $('#btnFusionPokedex').addEventListener('click', () => goToScreen('pokedex'));
-    $('#btnPokedexBack').addEventListener('click', () => goToScreen('menu'));
+    $('#btnPokedexBack').addEventListener('click', () => goToScreen(previousScreen));
     $('#btnFuseAgain').addEventListener('click', () => handleFuseAgain());
     $('#detailClose').addEventListener('click', closeDetail);
     $('#detailBackdrop').addEventListener('click', closeDetail);
-    $('#btnGlitchDismiss').addEventListener('click', () => $('#glitchUnlockOverlay').classList.add('hidden'));
+
+    // Center Magikarp click — triggers glitch when ready
+    $('#fusionMagikarp').addEventListener('click', () => handleGlitchClick());
+
+    // Outro screen buttons
+    $('#btnFreeMode').addEventListener('click', () => enterFreeMode());
+    $('#btnReset').addEventListener('click', () => resetProgress());
+
+    // Menu reset button (visible in free mode)
+    const menuReset = $('#btnMenuReset');
+    if (menuReset) menuReset.addEventListener('click', () => resetProgress());
 
     // Menu Magikarp easter egg
     let menuClicks = 0;
@@ -283,10 +315,23 @@ function createTypeRing() {
         ring.appendChild(btn);
     });
 
+    updateTypeRingUnlocked();
+
     let resizeTimeout;
     window.addEventListener('resize', () => {
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => createTypeRing(), 250);
+    });
+}
+
+function updateTypeRingUnlocked() {
+    $$('.type-icon-btn').forEach(btn => {
+        const typeId = btn.getAttribute('data-type');
+        if (unlocked.includes(typeId)) {
+            btn.classList.add('type-icon-unlocked');
+        } else {
+            btn.classList.remove('type-icon-unlocked');
+        }
     });
 }
 
@@ -416,6 +461,16 @@ function showResultPanel(fusion) {
 // ═══════════ FUSE AGAIN — POKÉBALL CAPTURE ═══════════
 async function handleFuseAgain() {
     if (isFusing) return;
+
+    // If glitch was just unlocked, show outro instead of fusing again
+    if (glitchJustUnlocked && !outroSeen) {
+        glitchJustUnlocked = false;
+        outroSeen = true;
+        localStorage.setItem(STORAGE_OUTRO, 'true');
+        goToScreen('outro');
+        return;
+    }
+
     isFusing = true;
 
     const magikarp = $('#fusionMagikarp');
@@ -496,6 +551,11 @@ async function handleFuseAgain() {
 
     lastFusion = null;
     isFusing = false;
+
+    // Check if all regular types are now unlocked — trigger exalted state
+    if (unlocked.filter(u => u !== 'glitch').length >= TOTAL_REGULAR && !unlocked.includes('glitch')) {
+        setTimeout(() => showGlitchUnlock(), 600);
+    }
 }
 
 function resetFusionScreen() {
@@ -510,6 +570,7 @@ function resetFusionScreen() {
     magikarp.src = 'assets/fusions/00 Magikarp original water.png';
     magikarp.style.filter = 'drop-shadow(0 8px 30px rgba(99, 144, 240, 0.4))';
     magikarp.className = 'fusion-magikarp';
+    magikarp.style.cursor = '';
 
     glow.style.background = 'radial-gradient(circle, rgba(99, 144, 240, 0.2), transparent 70%)';
     glow.style.width = '240px';
@@ -525,6 +586,21 @@ function resetFusionScreen() {
     hint.style.color = '';
     lastFusion = null;
     isFusing = false;
+    glitchReady = false;
+
+    updateTypeRingUnlocked();
+
+    // Check for pending glitch state or free mode
+    const allRegular = unlocked.filter(u => u !== 'glitch').length >= TOTAL_REGULAR;
+    if (freeMode && unlocked.includes('glitch')) {
+        // Free mode: center Magikarp is clickable for Magiglitch
+        magikarp.style.cursor = 'pointer';
+        hint.textContent = 'Click Magikarp to see MAGI\u0337\u0322GLITCH or choose a type';
+        hint.style.color = '#00ff41';
+    } else if (allRegular && !unlocked.includes('glitch')) {
+        // All regular unlocked but glitch not yet — trigger exalted
+        setTimeout(() => showGlitchUnlock(), 600);
+    }
 }
 
 // ═══════════ PARTICLE EFFECTS ═══════════
@@ -657,10 +733,126 @@ function closeDetail() {
     const m = $('#detailModal'); m.classList.add('hidden'); m.classList.remove('visible');
 }
 
-// ═══════════ GLITCH UNLOCK ═══════════
+// ═══════════ GLITCH UNLOCK — EXALTED STATE ═══════════
 function showGlitchUnlock() {
+    // Don't show popup — instead make center Magikarp exalted
+    glitchReady = true;
+    const magikarp = $('#fusionMagikarp');
+    magikarp.classList.add('exalted');
+    magikarp.style.cursor = 'pointer';
+    const hint = $('#fusionHint');
+    hint.textContent = '⚠ Something is wrong... click Magikarp ⚠';
+    hint.style.color = '#00ff41';
+}
+
+async function handleGlitchClick() {
+    if (isFusing) return;
+
+    // In free mode with glitch already unlocked — just show Magiglitch
+    if (freeMode && unlocked.includes('glitch')) {
+        startFusion(GLITCH_FUSION);
+        return;
+    }
+
+    // Normal glitch ready path
+    if (!glitchReady) return;
+    glitchReady = false;
+    isFusing = true;
+
+    const magikarp = $('#fusionMagikarp');
+    const glow = $('#fusionGlow');
+    const flash = $('#fusionFlash');
+    const arena = $('#fusionArena');
+    const ring = $('#typeRing');
+    const layout = $('#fusionLayout');
+    const resultPanel = $('#resultPanel');
+    const hint = $('#fusionHint');
+    const activeIcon = $('#activeTypeIcon');
+
+    // Phase 1: Corruption intensifies
+    magikarp.classList.remove('exalted');
+    magikarp.classList.add('corrupting');
+    hint.textContent = 'E̷̢R̵̢R̶̰O̸͙R̷̬...';
+    glow.style.background = 'radial-gradient(circle, rgba(0, 255, 65, 0.4), transparent 70%)';
+    glow.style.width = '400px';
+    glow.style.height = '400px';
+
+    const center = getCenterPosition();
+    spawnParticles(center.x, center.y, '#00ff41', 40);
+    spawnSparks(center.x, center.y, '#ff0040', 25);
+    arena.classList.add('shake');
+    await wait(1200);
+
+    // Phase 2: Flash + image swap
+    magikarp.classList.remove('corrupting');
+    magikarp.classList.add('pre-reveal');
+    magikarp.src = GLITCH_FUSION.image;
+    magikarp.style.filter = `drop-shadow(0 8px 30px ${GLITCH_FUSION.color}80)`;
+
+    flash.classList.add('active');
+    await wait(500);
+
+    // Phase 3: Split layout + reveal (same as regular fusions)
+    ring.classList.add('hiding');
+    arena.classList.remove('shake');
+
+    const center2 = getCenterPosition();
+    spawnParticles(center2.x, center2.y, GLITCH_FUSION.color, 30);
+
+    magikarp.classList.remove('pre-reveal');
+    magikarp.classList.add('revealing');
+    layout.classList.add('split');
+    await wait(300);
+
+    // Show active type icon (question mark style)
+    activeIcon.classList.remove('hidden');
+    activeIcon.style.setProperty('--glow-color', GLITCH_FUSION.color);
+    $('#activeTypeIconImg').src = '';
+
+    showResultPanel(GLITCH_FUSION);
+    await wait(700);
+
+    magikarp.classList.remove('revealing');
+    flash.classList.remove('active');
+
+    glow.style.background = `radial-gradient(circle, ${GLITCH_FUSION.color}33, transparent 70%)`;
+    glow.style.width = '260px';
+    glow.style.height = '260px';
+
     unlockFusion('glitch');
-    $('#glitchUnlockOverlay').classList.remove('hidden');
+    hint.textContent = '';
+    magikarp.style.cursor = '';
+    isFusing = false;
+
+    // Mark glitch as just unlocked — outro triggers on next fuse-again or menu
+    if (!outroSeen) {
+        glitchJustUnlocked = true;
+    }
+}
+
+function enterFreeMode() {
+    freeMode = true;
+    localStorage.setItem(STORAGE_FREE, 'true');
+    // Unlock all regular fusions + glitch
+    FUSIONS.forEach(f => {
+        if (!unlocked.includes(f.id)) {
+            unlocked.push(f.id);
+        }
+    });
+    if (!unlocked.includes('glitch')) unlocked.push('glitch');
+    saveUnlocked();
+    updateBadges();
+    // Show menu reset button
+    const menuReset = $('#btnMenuReset');
+    if (menuReset) menuReset.classList.remove('hidden');
+    goToScreen('fusion');
+}
+
+function resetProgress() {
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(STORAGE_OUTRO);
+    localStorage.removeItem(STORAGE_FREE);
+    location.reload();
 }
 
 // ═══════════ AMBIENT EFFECTS ═══════════
