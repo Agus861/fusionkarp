@@ -1,33 +1,20 @@
 # 🐟 Fusion-Karp: Magikarp Type Fusion Lab
 
-Welcome to the **Fusion-Karp Lab**, where we push the boundaries of Magikarp evolution! This tool allows you to visualize and experiment with different elemental fusions of everyone's favorite (and most misunderstood) Pokémon.
+**Fusion-Karp Lab** es un proyecto experimental diseñado para visualizar y explorar diversas fusiones elementales de Magikarp. Este sitio sirve como una demostración interactiva de diseño y lógica web.
 
-## 🚀 Getting Started
+## ✨ Sobre el Proyecto
 
-To run the Fusion-Karp Lab locally:
+- **Fusiones Dinámicas**: Explora cómo cambian los atributos visuales de Magikarp al fusionarse con diferentes tipos elementales.
+- **Interfaz Interactiva**: Una experiencia fluida centrada en la interacción del usuario.
+- **Tecnologías**: Construido puramente con **HTML5**, **Vanilla CSS** y **JavaScript** para garantizar ligereza y rendimiento.
 
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/Agus861/fusionkarp.git
-   ```
-2. Navigate to the project directory.
-3. run `start.bat` (on Windows) or serve the directory using any static web server:
-   ```bash
-   npx http-server .
-   ```
-4. Open your browser at `http://localhost:8080`.
+## 🎨 Créditos y Diseño
 
-## ✨ Features
+Este proyecto fue desarrollado por **Agus861** por puro ocio y diversión para un tercero. Todo el diseño visual y la identidad de marca están respaldados por:
 
-- **Dynamic Fusion**: Select different types to see Magikarp fusions.
-- **Rich UI**: Interactive elements and smooth transitions.
-- **Type Compatibility**: Visualizes how different types interact on a Magikarp base.
-
-## 🛠️ Built With
-
-- **HTML5/CSS3**: Vanilla styling for maximum performance.
-- **JavaScript**: Core logic for type switching and interactive updates.
-- **[SteamSkull Productions](https://steamskull.com)**: Original design and concept.
+🚀 **[SteamSkull Productions](https://steamskullproductions.myportfolio.com/work)**
 
 ---
-*Created by Agus861 and powered by the SteamSkull Productions engine.*
+
+### ⚠️ Disclaimer
+*Este es un proyecto sin fines de lucro, creado meramente por diversión. No existe ninguna afiliación, asociación, autorización o respaldo por parte de Nintendo Co., Ltd., Game Freak o The Pokémon Company.*
