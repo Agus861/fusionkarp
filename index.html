@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fusion-Karp — Magikarp Type Fusion</title>
+    <meta name="description" content="Fuse Magikarp with every Pokémon type! Collect all fusions in your Pokédex.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=Space+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- ═══════════ PARTICLE CANVAS (behind everything) ═══════════ -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- ═══════════ AMBIENT BUBBLES ═══════════ -->
+    <div class="ambient-bubbles" id="ambientBubbles"></div>
+
+    <!-- ═══════════ FLOATING TYPE ICONS (menu background) ═══════════ -->
+    <div class="menu-type-bg" id="menuTypeBg"></div>
+
+    <!-- ═══════════ POKÉBALL CAPTURE ANIMATION ═══════════ -->
+    <div class="pokeball-capture hidden" id="pokeballCapture">
+        <div class="pokeball-sprite">
+            <div class="pokeball-top"></div>
+            <div class="pokeball-mid">
+                <div class="pokeball-button"></div>
+            </div>
+            <div class="pokeball-bottom"></div>
+        </div>
+    </div>
+
+    <!-- ═══════════ SCREEN: MENU ═══════════ -->
+    <section id="menuScreen" class="screen active">
+        <div class="menu-container">
+            <div class="menu-logo-wrap">
+                <img src="assets/logos/Pokemon text logo.png" alt="Pokémon" class="menu-pokemon-logo">
+                <h1 class="menu-title">
+                    <span class="title-fusion">FUSION</span><span class="title-dash">-</span><span
+                        class="title-karp">KARP</span>
+                </h1>
+                <p class="menu-subtitle">TYPE FUSION LABORATORY</p>
+            </div>
+
+            <div class="menu-magikarp-wrap">
+                <div class="menu-glow"></div>
+                <img src="assets/fusions/00 Magikarp original water.png" alt="Magikarp" class="menu-magikarp"
+                    id="menuMagikarp">
+            </div>
+
+            <div class="menu-buttons">
+                <button class="btn btn-primary" id="btnStartFusion">
+                    <span class="btn-icon">⚡</span>
+                    START FUSION
+                </button>
+            </div>
+
+            <!-- INLINE ABOUT CARD -->
+            <div class="about-card">
+                <div class="about-card-inner">
+                    <div class="about-card-text">
+                        <h3 class="about-card-title">About Fusion-Karp</h3>
+                        <p class="about-card-body">
+                            Dedicated to the true Magikarp enthusiasts. Inspired by <strong
+                                class="about-highlight">César</strong>, whose love for Magikarp sparked the idea of
+                            fusing this legendary fish with every type.
+                        </p>
+                        <p class="about-card-disclaimer">
+                            All Pokémon imagery belongs to Nintendo / Game Freak / The Pokémon Company. Fan-made with ❤️
+                        </p>
+                        <a href="https://steamskullproductions.myportfolio.com/work" target="_blank" rel="noopener"
+                            class="about-studio-link">
+                            Powered by <strong>SteamSkull Productions</strong> 💀
+                        </a>
+                    </div>
+                    <div class="about-card-pfp">
+                        <img src="assets/logos/PFP Cesar.png" alt="César" class="pfp-image">
+                    </div>
+                </div>
+            </div>
+
+            <div class="menu-footer">
+                <img src="assets/logos/Pokeball color.png" alt="" class="footer-pokeball">
+                <span>Select a type. Witness the fusion.</span>
+                <img src="assets/logos/Pokeball color.png" alt="" class="footer-pokeball">
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════ SCREEN: FUSION LAB ═══════════ -->
+    <section id="fusionScreen" class="screen">
+        <nav class="top-bar">
+            <button class="btn-nav" id="btnFusionBack">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 18l-6-6 6-6" />
+                </svg>
+                MENU
+            </button>
+            <div class="top-bar-title">FUSION LAB</div>
+            <button class="btn-nav" id="btnFusionPokedex">
+                <img src="assets/logos/Pokeball color.png" alt="" class="nav-pokeball-icon">
+                POKÉDEX
+                <span class="btn-badge-small" id="pokedexBadgeSmall">0/15</span>
+            </button>
+        </nav>
+
+        <div class="fusion-layout" id="fusionLayout">
+            <!-- LEFT SIDE: Arena -->
+            <div class="fusion-arena" id="fusionArena">
+                <!-- Central Magikarp -->
+                <div class="fusion-center">
+                    <div class="fusion-glow" id="fusionGlow"></div>
+                    <img src="assets/fusions/00 Magikarp original water.png" alt="Magikarp" class="fusion-magikarp"
+                        id="fusionMagikarp">
+                    <!-- Active type icon (shown only during result) -->
+                    <div class="active-type-icon hidden" id="activeTypeIcon">
+                        <img src="" alt="" id="activeTypeIconImg">
+                    </div>
+                </div>
+
+                <!-- Type Icons Ring -->
+                <div class="type-ring" id="typeRing"></div>
+
+                <!-- Fusion flash overlay -->
+                <div class="fusion-flash" id="fusionFlash"></div>
+
+                <!-- Instruction text (inside arena) -->
+                <p class="fusion-hint" id="fusionHint">Choose a type to begin fusion</p>
+            </div>
+
+            <!-- RIGHT SIDE: Result Card (hidden until fusion complete) -->
+            <div class="result-panel hidden" id="resultPanel">
+                <div class="result-panel-inner">
+                    <h2 class="result-name" id="resultName"></h2>
+                    <div class="result-type-badge" id="resultTypeBadge">
+                        <img src="" alt="" class="result-type-icon" id="resultTypeIcon">
+                        <span id="resultTypeName"></span>
+                    </div>
+                    <div class="result-divider"></div>
+                    <p class="result-desc" id="resultDesc"></p>
+                    <div class="result-stats">
+                        <span class="result-id" id="resultId">#001</span>
+                        <span class="result-label">FUSION POKÉDEX</span>
+                    </div>
+                    <button class="btn btn-fuse-again" id="btnFuseAgain">
+                        <img src="assets/logos/Pokeball color.png" alt="" class="btn-pokeball-icon">
+                        FUSE AGAIN
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════ SCREEN: POKÉDEX ═══════════ -->
+    <section id="pokedexScreen" class="screen">
+        <nav class="top-bar">
+            <button class="btn-nav" id="btnPokedexBack">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 18l-6-6 6-6" />
+                </svg>
+                MENU
+            </button>
+            <div class="top-bar-title">
+                <img src="assets/logos/Pokedex icon.png" alt="" class="pokedex-title-icon">
+                FUSION POKÉDEX
+            </div>
+            <div class="pokedex-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <span class="progress-text" id="progressText">0/16</span>
+            </div>
+        </nav>
+
+        <div class="pokedex-grid" id="pokedexGrid"></div>
+
+        <!-- Detail Modal -->
+        <div class="detail-modal hidden" id="detailModal">
+            <div class="detail-modal-backdrop" id="detailBackdrop"></div>
+            <div class="detail-modal-content" id="detailContent">
+                <button class="detail-close" id="detailClose">✕</button>
+                <div class="detail-image-wrap">
+                    <img src="" alt="" class="detail-image" id="detailImage">
+                </div>
+                <h2 class="detail-name" id="detailName"></h2>
+                <div class="detail-type-badge" id="detailTypeBadge">
+                    <img src="" alt="" class="detail-type-icon" id="detailTypeIcon">
+                    <span id="detailTypeName"></span>
+                </div>
+                <p class="detail-desc" id="detailDesc"></p>
+                <div class="detail-number" id="detailNumber">#001</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About modal removed — now inline in menu -->
+
+    <!-- ═══════════ GLITCH UNLOCK OVERLAY ═══════════ -->
+    <div class="glitch-unlock-overlay hidden" id="glitchUnlockOverlay">
+        <div class="glitch-unlock-content">
+            <div class="glitch-static"></div>
+            <h2 class="glitch-unlock-title" data-text="SECRET UNLOCKED">SECRET UNLOCKED</h2>
+            <p class="glitch-unlock-sub">You found all fusions!</p>
+            <p class="glitch-unlock-sub">A strange signal has appeared...</p>
+            <img src="assets/fusions/Magikarp glitch.png" alt="Glitch Magikarp" class="glitch-unlock-image">
+            <h3 class="glitch-unlock-name" data-text="MAGI̷̢GLITCH">MAGI̷̢GLITCH</h3>
+            <button class="btn btn-primary glitch-unlock-btn" id="btnGlitchDismiss">ACCEPT SIGNAL</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
